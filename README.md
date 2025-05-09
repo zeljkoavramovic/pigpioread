@@ -187,19 +187,23 @@ The output is a table with these columns:
 - **Error: `Invalid parameter`**:
   - Use a non-negative integer (e.g., `28`), `j8` (case-insensitive), or a help flag (e.g., `-h`).
 - **No output or unexpected output**:
+  
   - Verify that `raspi-gpio` is functioning correctly by running `raspi-gpio get 0`.
   - Ensure you have sufficient permissions (try running with `sudo` if necessary).
+  - Ensure that `raspi-gpio` and  `raspbian` are recent version, since `raspi-gpio` used to have slightly different output
 - **Command not found after moving to `~/.local/bin`**:
+  
   - Confirm that `~/.local/bin` is in your `PATH` (see [Optimal Installation Location](#optimal-installation-location)).
 - **Compatibility issues**:
   
-  - The script is tested on Raspberry Pi 4B. If you encounter issues on other models, please report them in the [Discussions](https://github.com/zeljkoavramovic/pigpioread/discussions/1) section.
+  - The script is tested on Raspberry Pi 4B. If you encounter issues on other models, please report them in the [Discussions](https://github.com/zeljkoavramovic/pigpioread/discussions/1) section. You can also let me know the model you tested even if everything works without issues.
 
 
 
 ## License
 
-This project is licensed under the Mozilla Public License 2.0 (MPL-2.0).
+-   This project is licensed under the [Mozilla Public License 2.0 (MPL-2.0)](https://www.mozilla.org/en-US/MPL/2.0/).
+-   [License explained in plain English](https://www.tldrlegal.com/license/mozilla-public-license-2-0-mpl-2)
 
 
 
