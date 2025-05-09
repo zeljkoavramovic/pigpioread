@@ -63,23 +63,6 @@ The **`pigpioread`** script simplifies inspecting Raspberry Pi GPIO pins by leve
    ./pigpioread
    ```
 
-List only J8 header pins:
-
-```bash
-./pigpioread j8
-```
-
-Show only specific pin (e.g., GPIO 28):
-
-```bash
-./pigpioread 28
-```
-
-To filter for PWM pins:
-```bash
-./pigpioread | grep PWM
-```
-
 
 
 ## Optimal Installation Location
