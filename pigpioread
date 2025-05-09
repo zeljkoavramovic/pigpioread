@@ -1,0 +1,117 @@
+#!/bin/bash
+
+###################################################################################################
+#                                                                                                 #
+#  pigpioread v1.0 - utility to list all Raspberry Pi gpio pins, status, and pin functions        #
+#                                                                                                 #
+#  SPDX-License-Identifier: MPL-2.0                                                               #
+#  SPDX-FileCopyrightText:  Copyright 2025 Zeljko Avramovic                                       #
+#                                                                                                 #
+###################################################################################################
+
+# J8 header pin mapping       00   01   02   03   04   05   06   07   08   09
+declare -a headerpinsarray=( "27" "28" "3 " "5 " "7 " "29" "31" "26" "24" "21"        # gpio 00..09
+                             "19" "23" "32" "33" "8 " "10" "36" "11" "12" "35"        # gpio 10..19 
+                             "38" "40" "15" "16" "18" "22" "37" "13" "- " "- "        # gpio 20..29 
+                             "- " "- " "- " "- " "- " "- " "- " "- " "- " "- "        # gpio 30..39
+                             "- " "- " "- " "- " "- " "- " "- " "- " "- " "- "        # gpio 40..49
+                             "- " "- " "- " "- " "- " "- " "- " "- " "- " "- " )      # gpio 50..59
+
+printhelp() {
+  echo "pigpioread v1.0, Zeljko Avramovic (c) 2025, License: MPL 2.0"
+  echo "  List all Raspberry Pi gpio pins, current status, current and available pin functions."
+  echo "  This script depends on raspi-gpio since it parses it's multiple outputs, combines them and prettifies them."
+  echo "    Try 'pigpioread' without parameters to get info about all gpio pins."
+  echo "    Try 'pigpioread j8' to get info about gpio pins on the J8 header."
+  echo "    Try 'pigpioread 28' to get info about gpio pin 28."
+  echo "    Try 'pigpioread | grep PWM' to get info about all gpio pins that can be used for pwm."
+  echo "    Try 'pigpioread | grep SPI' to get info about all gpio pins that can be used for spi."
+  echo "    Try 'pigpioread | grep -e RXD -e TXD' to get info about all gpio pins that can be used for serial."
+  echo "    Try 'pigpioread | grep -e \|SDA -e \|SCL' to get info about all gpio pins that can be used for i2c."
+  echo "    Try 'pigpioread -h' for help."
+}
+
+printhorline() {
+  echo "-----------------------------------------------------------------------------------------------------------------------------------------------"
+}
+
+printheader() {
+  printhorline
+  echo "GPIO|J8|LV|ALT|FUNC            |PULL|DFLT|ALT0            |ALT1            |ALT2            |ALT3            |ALT4            |ALT5            "
+  printhorline
+}
+
+printrow() {
+  gpionum=$1                                  # parameter is gpio number
+  get=$(raspi-gpio get $gpionum)              # get status of a single gpio using external tool
+  IFS=' ' read -r -a getarray <<< $get        # get holds space separated values that we store into getarray
+
+  # latest raspi-gpio does not have fsel:
+  getarray[1]=${getarray[1]%":"}              # remove suffix ":" from "1:"
+  getarray[2]=${getarray[2]#"level="}         # remove prefix "level=" from "level=1"
+  if [[ "${getarray[2]}" =~ ^1.* ]]; then     # if string begins with "1" then we have LEVEL=HI
+    getarray[2]="HI"
+  else
+    getarray[2]="LO"
+  fi
+  if [[ "${getarray[3]}" =~ ^alt.* ]]; then   # if string begins with "alt" then we have additional ALT column
+    getarray[3]=${getarray[3]#"alt="}         # remove prefix "alt=" from "alt=3"
+    getarray[4]=${getarray[4]#"func="}        # remove prefix "func=" from "func=TXD0"
+    getarray[5]=${getarray[5]#"pull="}        # remove prefix "pull=" from "pull=NONE"
+  else
+    getarray[5]=${getarray[4]#"pull="}        # remove prefix "pull=" from "pull=NONE"
+    getarray[4]=${getarray[3]#"func="}        # remove prefix "func=" from "func=TXD0"
+    getarray[3]="-"                           # fake ALT column
+  fi
+  printf "%-4s|%-2s|%-2s|%-3s|%-16s|%-4s|" "${getarray[1]}" "${headerpinsarray[$gpionum]}" "${getarray[2]}" "${getarray[3]}" "${getarray[4]}" "${getarray[5]}"
+
+  func=$(raspi-gpio funcs $gpionum | tail -n +2) # get functions of a single gpio using external tool
+  IFS=', ' read -r -a funcarray <<< $func     # 2nd row of funcs holds comma separated values that we store into funcarray
+  printf "%-4s|%-16s|%-16s|%-16s|%-16s|%-16s|%-16s\n" "${funcarray[1]}" "${funcarray[2]}" "${funcarray[3]}" "${funcarray[4]}" "${funcarray[5]}" "${funcarray[6]}" "${funcarray[7]}"
+}
+
+########
+# main #
+########
+
+declare -a helparray=("-h" "--h" "-help" "--help" "help" "h" "/h" "/help" "-?" "/?")
+
+if [ "$#" -eq 1 ]; then
+  param=$1
+  if [[ " ${helparray[@]} " =~ " $param " ]]; then
+    printhelp
+  elif [[ ${param,,} == "j8" ]]; then
+    printheader
+    gpiocnt=0
+    while [[ $(raspi-gpio get ${gpiocnt} | grep Unknown) = "" ]]; do
+      if [ "${headerpinsarray[$gpiocnt]}" != "- " ]; then
+        printrow $gpiocnt
+      fi
+      ((gpiocnt++))
+    done
+    printhorline
+  elif [[ $param =~ ^[0-9]+$ ]]; then
+    gpionum=$param
+    if [[ $(raspi-gpio get $gpionum | grep Unknown) = "" ]]; then
+      printheader
+      printrow $gpionum
+      printhorline
+    else
+      echo "gpio number is out of range"
+    fi
+  else
+    echo "Invalid parameter. Try 'pigpioread -h' for help."
+  fi
+else
+  if [ "$#" -eq 0 ]; then
+    printheader
+    gpiocnt=0
+    while [[ $(raspi-gpio get ${gpiocnt} | grep Unknown) = "" ]]; do
+      printrow $gpiocnt
+      ((gpiocnt++))
+    done
+    printhorline
+  else
+    echo "That many parameters are not supported."
+  fi
+fi
