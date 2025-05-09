@@ -1,6 +1,6 @@
 # pigpioread - Show GPIO pins configuration and functions
 
-**`pigpioread` ** is a tool for Raspberry Pi that provides a convenient way to view the current configuration and all potential capabilities of each GPIO pin, with a unique feature to easily see what pins can be used for I2C, what pins for PWM, etc.
+**`pigpioread`** is a tool for Raspberry Pi that provides a convenient way to view the current configuration and all potential capabilities of each GPIO pin, with a unique feature to easily see what pins can be used for I2C, what pins for PWM, etc.
 
 
 
