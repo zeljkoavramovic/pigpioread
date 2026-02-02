@@ -55,7 +55,6 @@ The **`pigpioread`** script simplifies inspecting Raspberry Pi GPIO pins by leve
    cd pigpioread
    ```
    
-   
 3. **Make the script executable**:
    ```bash
    chmod +x pigpioread
@@ -215,3 +214,9 @@ If you find `pigpioread` helpful, please consider:
 
 - ⭐ Starring the repository on GitHub.
 - 💬 Sharing feedback or suggestions in the [Discussions](https://github.com/zeljkoavramovic/pigpioread/discussions/1) section.
+- <a href="https://buymeacoffee.com/cupofavra" target="_blank">
+     <img align="left"
+          src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+          alt="Buy Me A Coffee"
+          style="height: 35px !important; width: 150px !important;" />
+   </a>
